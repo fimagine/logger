@@ -1,0 +1,19 @@
+{
+  "name": "@gim/logger",
+  "version": "1.0.0",
+  "description": "logger implemented by typescript decorater",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "logger",
+    "typescipt",
+    "decorator"
+  ],
+  "author": "gim",
+  "license": "MIT",
+  "dependencies": {
+    "@gim/annotation": "^1.0.0"
+  }
+}
