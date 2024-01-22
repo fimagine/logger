@@ -1,4 +1,4 @@
-# @gim/logger
+# @fimagine/logger
 
 [中文README](./README.MD)
 
@@ -29,7 +29,7 @@ You can try this module, if your code is written in typescript with class-style,
 - step 2: use this module in your code
 
   ```typescript
-  import { Info } from "@gim/logger"
+  import { Info } from "@fimagine/logger"
 
   Info.showArgs = true; // show function params;
   Info.showRet = true; // show function return;

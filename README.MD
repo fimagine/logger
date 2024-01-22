@@ -1,4 +1,4 @@
-# @gim/logger
+# @fimagine/logger
 
 [English README](./README.EN.MD)
 
@@ -27,7 +27,7 @@
 - 步骤2: 在你的代码中引入
 
   ```typescript
-  import { Info } from "@gim/logger"
+  import { Info } from "@fimagine/logger"
 
   Info.showArgs = true; // show function params;
   Info.showRet = true; // show function return;

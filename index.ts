@@ -1,4 +1,4 @@
-import { Annotation } from "@gim/annotation";
+import { Annotation } from "@fimagine/annotation";
 export type LogTiming = 'enter' | 'leave' | 'reject'
 export interface IGlobalLoggerConfig {
   currentTime: () => string;

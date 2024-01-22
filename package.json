@@ -1,5 +1,5 @@
 {
-  "name": "@gim/logger",
+  "name": "@fimagine/logger",
   "version": "1.0.6",
   "description": "logger implemented by typescript decorater",
   "main": "dist/index.js",
@@ -17,7 +17,7 @@
   "author": "gim",
   "license": "MIT",
   "dependencies": {
-    "@gim/annotation": "^1.0.0"
+    "@fimagine/annotation": "^1.0.0"
   },
   "devDependencies": {
     "typescript": "^5.3.3"
