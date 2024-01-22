@@ -1,19 +1,21 @@
 # @gim/logger
 
-[英文README](./README.EN.MD)
+[中文README](./README.MD)
 
-如果你的代码用的是typescript且用class方式写的，还需要在函数调用时产生一些输出。那你可以试试这玩意。
+You can try this module, if your code is written in typescript with class-style, and you need make some log output when a function is called.
 
-## 注意事项
+## Notices
 
-- 基于Typescript的装饰器(stage 2)实现，但目前还不支持装饰器(stage 3)。
-- 性能消耗是铁定有的，这方面还请您自行把握。
+- Base on experimental stage 2 decorators implementation, currently not available with stage 3 decorator (since Typescript 5.0)
+- Will bring performance loss, please decide for yourself how to handle this.
 
 ## Quick Start
 
-- 步骤1: 开启experimentalDecorators
+- step 1: enable experimentalDecorators in your project
 
-  - 可以在 "tsconfig.json"进行如下配置。
+  choose one of the ways;
+
+  - in "tsconfig.json"
 
     ```json
     {
@@ -22,9 +24,9 @@
       }
     }
     ```
-  - 或者在"tsc"后追加参数。
+  - or "tsc"
     ``tsc --target ES5 --experimentalDecorators``
-- 步骤2: 在你的代码中引入
+- step 2: use this module in your code
 
   ```typescript
   import { Info } from "@gim/logger"
@@ -46,7 +48,7 @@
   new Hello('hi.').sayIt('hello')
   ```
 
-  以上代码输出如下：
+  you would see this in your console:
 
   ```text
   [I][2024-01-22T08:39:56.985Z][call_id:1][Class Hello][NEW] 
@@ -59,6 +61,6 @@
   result: hello world
   ```
 
-## 更多说明
+## For More
 
 - TODO
