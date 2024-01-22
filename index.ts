@@ -28,35 +28,35 @@ const Config: IGlobalLoggerConfig = {
 };
 const Create: ILoggerCreator = function (opts: Partial<ILoggerOpts> = {}): ILogger {
   const ret: ILogger = function _RET(target: Annotation.Prototype, property: string, descriptor: any) {
-    const show = (str: string, timing: LogTiming, params: any[] = [], result: any = void 0) =>
-      _RET.console![_RET.level](str,
-        (_RET.showArgs && timing === 'enter') ? '\nparams:' : '', ...params,
-        (_RET.showRet && timing !== 'enter') ? (timing !== 'leave' ? '\nresult:' : '\nreason:') : '',
-        (_RET.showRet && timing !== 'enter') ? result : '',
-      )
+    const show = (str: string, timing: LogTiming, params: any[] = [], result: any = void 0) => {
+      const args = [str];
+      (_RET.showArgs && timing === 'enter') && args.push('\nparams:', ...params);
+      (_RET.showRet && timing === 'leave') && args.push('\nresult:', result);
+      (timing === 'reject') && args.push('\nreason:', result);
+      _RET.console![_RET.level](...args)
+    }
 
     const func = `${target.constructor.name}.${property}`;
-
-    const fixed = `[${_RET.level[0].toUpperCase()}][${func}]`
+    const short_level = `[${_RET.level[0].toUpperCase()}]`
+    const fixed = `[${func}]`
     const { value } = descriptor;
     descriptor.value = function (...params: any) {
       if (_RET.disabled) return value.call(this, ...params);
       const uid = `[call_id:${++_uid}]`
 
-
       _RET.print ?
         _RET.print(_RET, func, uid, 'enter', params) :
-        show(`[${_RET.currentTime!()}]${fixed}${uid}[ENTER]`, 'enter', _RET.showArgs ? params : void 0);
+        show(`${short_level}[${_RET.currentTime!()}]${uid}${fixed}[ENTER]`, 'enter', _RET.showArgs ? params : void 0);
 
       const ret = value.call(this, ...params);
 
       const print_leave_log = (ret: any) => _RET.print ?
         _RET.print(_RET, func, uid, 'leave', params, ret) :
-        show(`[${_RET.currentTime!()}]${fixed}${uid}[LEAVE]`, 'leave', void 0, ret);
+        show(`${short_level}[${_RET.currentTime!()}]${uid}${fixed}[LEAVE]`, 'leave', void 0, ret);
 
       const print_reject_log = (reason: any) => _RET.print ?
         _RET.print(_RET, func, uid, 'reject', params, reason) :
-        show(`[${_RET.currentTime!()}]${fixed}${uid}[REJECT]`, 'reject', void 0, reason);
+        show(`${short_level}[${_RET.currentTime!()}]${uid}${fixed}[REJECT]`, 'reject', void 0, reason);
 
       if (!(ret instanceof Promise)) {
         print_leave_log(ret)
@@ -102,8 +102,12 @@ export const Info: Annotation.IFunc = Create({ level: 'info' })
 export const Err: Annotation.IFunc = Create({ level: 'error' })
 
 const Logger: Annotation.IFunc & {
-  readonly Create: ILoggerCreator;
-  readonly Config: IGlobalLoggerConfig;
-} = Object.assign(Log, { Create, Config })
-
+  Config: IGlobalLoggerConfig;
+  Create: ILoggerCreator;
+  Warn: Annotation.IFunc;
+  Log: Annotation.IFunc;
+  Debug: Annotation.IFunc;
+  Info: Annotation.IFunc;
+  Err: Annotation.IFunc;
+} = Object.assign(Log, { Config, Create, Warn, Log, Debug, Info, Err })
 export default Logger;

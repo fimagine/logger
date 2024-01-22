@@ -1,2 +1,4 @@
 node_modules
 dist
+example/index.js
+example/index.d.ts
