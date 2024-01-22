@@ -1,11 +1,11 @@
 {
   "name": "@gim/logger",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "logger implemented by typescript decorater",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": "cd example && tsc && node ./index",
+    "test": "npm run build && cd example && tsc && node ./index",
     "build": "tsc",
     "release": "tsc && npm publish"
   },

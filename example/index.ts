@@ -27,6 +27,8 @@ const LogWithCustomConsole = Log.Create({
   }
 })
 
+@Log.Warn
+@Log.Info
 class Foo {
   @Log.Warn
   simple_warn() { return "i'm return value" }
@@ -68,9 +70,20 @@ class Foo {
   custom_console() { return "i'm return value" }
 }
 
+function get_base_prototype(p: any): any {
+  if (p.constructor.name !== '_logger_wrapped') return p;
+  return get_base_prototype(Object.getPrototypeOf(p))
+
+}
+function get_base_prototype_by_inst(inst: any): any {
+  return get_base_prototype(Object.getPrototypeOf(inst))
+}
+
 async function run() {
   const bar = new Foo()
-  const func_names = Object.getOwnPropertyNames(Foo.prototype).filter(v => v !== 'constructor' && typeof (Foo.prototype as any)[v] === 'function')
+  const real_prototype = get_base_prototype_by_inst(bar)
+  const func_names = Object.getOwnPropertyNames(real_prototype).filter(v => v !== 'constructor' && typeof (real_prototype as any)[v] === 'function')
+
   for (const func_name of func_names) {
     console.log('\n')
     try { await (bar as any)[func_name]("i'm params 1", "i'm params 2") } catch (e) { }
