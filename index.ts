@@ -27,13 +27,13 @@ const Config: IGlobalLoggerConfig = {
   disabled: false,
 };
 const Create: ILoggerCreator = function (opts: Partial<ILoggerOpts> = {}): ILogger {
-  const ret: ILogger = function _RET(target: any, property?: any, descriptor?: any): any {
+  const ret: ILogger = function r(target: any, property?: any, descriptor?: any): any {
     const show = (str: string, timing: LogTiming, params: any[] = [], result: any = void 0) => {
       const args = [str];
-      (_RET.showArgs && timing === 'enter') && args.push('\nparams:', ...params);
-      (_RET.showRet && timing === 'leave') && args.push('\nresult:', result);
+      (r.showArgs && timing === 'enter') && args.push('\nparams:', ...params);
+      (r.showRet && timing === 'leave') && args.push('\nresult:', result);
       (timing === 'reject') && args.push('\nreason:', result);
-      _RET.console![_RET.level](...args)
+      r.console![r.level](...args)
     }
     const func = property ? `${target.constructor.name}.${property}` : `Class ${target.name}`;
     const fixed = `[${func}]`
@@ -41,23 +41,23 @@ const Create: ILoggerCreator = function (opts: Partial<ILoggerOpts> = {}): ILogg
       // CLASS FUNCTION DECORATOR
       const { value } = descriptor;
       descriptor.value = function (...params: any) {
-        const short_level = `[${_RET.level[0].toUpperCase()}]`
-        if (_RET.disabled) return value.call(this, ...params);
+        const short_level = `[${r.level[0].toUpperCase()}]`
+        if (r.disabled) return value.call(this, ...params);
         const uid = `[call_id:${++_uid}]`
 
-        _RET.print ?
-          _RET.print(_RET, func, uid, 'enter', params) :
-          show(`${short_level}[${_RET.currentTime!()}]${uid}${fixed}[ENTER]`, 'enter', _RET.showArgs ? params : void 0);
+        r.print ?
+          r.print(r, func, uid, 'enter', params) :
+          show(`${short_level}[${r.currentTime!()}]${uid}${fixed}[ENTER]`, 'enter', r.showArgs ? params : void 0);
 
         const ret = value.call(this, ...params);
 
-        const print_leave_log = (ret: any) => _RET.print ?
-          _RET.print(_RET, func, uid, 'leave', params, ret) :
-          show(`${short_level}[${_RET.currentTime!()}]${uid}${fixed}[LEAVE]`, 'leave', void 0, ret);
+        const print_leave_log = (ret: any) => r.print ?
+          r.print(r, func, uid, 'leave', params, ret) :
+          show(`${short_level}[${r.currentTime!()}]${uid}${fixed}[LEAVE]`, 'leave', void 0, ret);
 
-        const print_reject_log = (reason: any) => _RET.print ?
-          _RET.print(_RET, func, uid, 'reject', params, reason) :
-          show(`${short_level}[${_RET.currentTime!()}]${uid}${fixed}[REJECT]`, 'reject', void 0, reason);
+        const print_reject_log = (reason: any) => r.print ?
+          r.print(r, func, uid, 'reject', params, reason) :
+          show(`${short_level}[${r.currentTime!()}]${uid}${fixed}[REJECT]`, 'reject', void 0, reason);
 
         if (!(ret instanceof Promise)) {
           print_leave_log(ret)
@@ -75,17 +75,17 @@ const Create: ILoggerCreator = function (opts: Partial<ILoggerOpts> = {}): ILogg
       // CLASS DECORATOR
       return class _logger_wrapped extends target {
         constructor(...params: any[]) {
-          const short_level = `[${_RET.level[0].toUpperCase()}]`
+          const short_level = `[${r.level[0].toUpperCase()}]`
           const uid = `[call_id:${++_uid}]`
-          _RET.print ?
-            _RET.print(_RET, func, uid, 'enter', params) :
-            show(`${short_level}[${_RET.currentTime!()}]${uid}${fixed}[NEW]`, 'enter', _RET.showArgs ? params : void 0);
+          r.print ?
+            r.print(r, func, uid, 'enter', params) :
+            show(`${short_level}[${r.currentTime!()}]${uid}${fixed}[NEW]`, 'enter', r.showArgs ? params : void 0);
 
           super(...params);
 
-          const print_leave_log = (ret: any) => _RET.print ?
-            _RET.print(_RET, func, uid, 'leave', params, ret) :
-            show(`${short_level}[${_RET.currentTime!()}]${uid}${fixed}[END]`, 'leave', void 0, ret);
+          const print_leave_log = (ret: any) => r.print ?
+            r.print(r, func, uid, 'leave', params, ret) :
+            show(`${short_level}[${r.currentTime!()}]${uid}${fixed}[END]`, 'leave', void 0, ret);
           print_leave_log(this)
         }
       }
