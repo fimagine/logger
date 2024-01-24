@@ -1,6 +1,6 @@
 # @fimagine/logger
 
-[中文README](./README.MD)
+[中文README](./README.CN.MD)
 
 You can try this module, if your code is written in typescript with class-style, and you need make some log output when a function is called.
 
