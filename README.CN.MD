@@ -1,6 +1,6 @@
 # @fimagine/logger
 
-[English README](./README.EN.MD)
+[English README](./README.MD)
 
 如果你的代码用的是typescript且用class方式写的，还需要在函数调用时产生一些输出。那你可以试试这玩意。
 
