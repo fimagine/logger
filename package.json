@@ -1,6 +1,6 @@
 {
   "name": "@fimagine/logger",
-  "version": "1.0.7",
+  "version": "1.1.0",
   "description": "logger implemented by typescript decorater",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

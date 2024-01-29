@@ -1,6 +1,6 @@
-import Log from "../dist";
+import Log, { Info } from "../dist";
 
-const LogWithArg = Log.Create({ level: 'info', showArgs: true, showRet: true })
+const LogArgsRet = Log.Create({ level: 'info', showArgs: true, showRet: true })
 
 const LogWithCustomTime = Log.Create({
   level: 'info', currentTime: () => {
@@ -45,19 +45,19 @@ class Foo {
   @Log.Err
   simple_err() { return "i'm return value" }
 
-  @LogWithArg
+  @LogArgsRet
   log_with_params_and_return(...args: any[]) { return "i'm return value" }
 
-  @LogWithArg
+  @LogArgsRet
   async log_with_params_and_async_resolve(...args: any[]) { return "i'm return value" }
 
-  @LogWithArg
+  @LogArgsRet
   async log_with_params_and_async_throw(...args: any[]) { throw "i'm reject reason" }
 
-  @LogWithArg
+  @LogArgsRet
   log_with_params_and_promise_resolve(...args: any[]) { return Promise.resolve("i'm return value") }
 
-  @LogWithArg
+  @LogArgsRet
   log_with_params_and_promise_reject(...args: any[]) { return Promise.reject("i'm reject reason") }
 
   @LogWithCustomTime
@@ -68,6 +68,16 @@ class Foo {
 
   @LogWithCustomConsole
   custom_console() { return "i'm return value" }
+
+  @LogArgsRet
+  promise_resolved(param_0: string) {
+    return new Promise((f) => setTimeout(() => f(param_0 + ' resolved!'), 1000))
+  }
+
+  @LogArgsRet
+  promise_rejected(param_0: string) {
+    return new Promise((_, f) => setTimeout(() => f(param_0 + ' rejected!'), 1000))
+  }
 }
 
 function get_base_prototype(p: any): any {
@@ -105,5 +115,38 @@ async function run() {
   console.log('LogWithCustomTime.disabled = false');
   LogWithCustomTime.disabled = false
   console.log('"custom_time_string" called, result:', bar.custom_time_string());
+
+
+  bar.promise_resolved("params 0");
+  bar.promise_rejected("params 0").catch(() => { });
+
+  const func = function (who: string) { return "i'm " + who };
+  console.log(LogArgsRet.Wrap(func)("davis") === func("davis"))
+
+
+  Info.showArgs = true; // show function params;
+  Info.showRet = true; // show function return;
+
+  // set current time string, or it will be unix timestamp in milliseconds.
+  Info.currentTime = () => new Date().toISOString()
+
+  @Info
+  class Hello {
+    constructor(what: string) { }
+
+    @Info
+    sayIt(what: string) { return what + ' world' }
+
+    @Info
+    async resolved(what: string) { return what + ' resolved' }
+
+    @Info
+    async rejected(what: string) { throw what + ' rejected' }
+  }
+  const hello = new Hello('hi.')
+  hello.sayIt('hello')
+  hello.resolved('hello')
+  hello.rejected('hello').catch(() => {})
 }
 run()
+

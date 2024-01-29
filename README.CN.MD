@@ -37,26 +37,42 @@
 
   @Info
   class Hello {
-    constructor(what: string) {}
+    constructor(what: string) { }
 
     @Info
     sayIt(what: string) { return what + ' world' }
-  }
 
-  new Hello('hi.').sayIt('hello')
+    @Info
+    async resolved(what: string) { return what + ' resolved' }
+
+    @Info
+    async rejected(what: string) { throw what + ' rejected' }
+  }
+  const hello = new Hello('hi.')
+  hello.sayIt('hello')
+  hello.resolved('hello')
+  hello.rejected('hello').catch(() => {})
   ```
 
   以上代码输出如下：
 
   ```text
-  [I][2024-01-22T08:39:56.985Z][call_id:1][Class Hello][NEW] 
+  [I][2024-01-29T04:13:19.288Z][call_id:23][Class Hello][NEW]
   params: hi.
-  [I][2024-01-22T08:39:56.987Z][call_id:1][Class Hello][END]
+  [I][2024-01-29T04:13:19.288Z][call_id:23][Class Hello][END]
   result: _logger_wrapped {}
-  [I][2024-01-22T08:39:56.989Z][call_id:2][Hello.sayIt][ENTER]
+  [I][2024-01-29T04:13:19.288Z][call_id:24][Hello.sayIt][ENTER]
   params: hello
-  [I][2024-01-22T08:39:56.989Z][call_id:2][Hello.sayIt][LEAVE]
+  [I][2024-01-29T04:13:19.289Z][call_id:24][Hello.sayIt][LEAVE]
   result: hello world
+  [I][2024-01-29T04:13:19.289Z][call_id:25][Hello.resolved][ENTER]
+  params: hello
+  [I][2024-01-29T04:13:19.289Z][call_id:26][Hello.rejected][ENTER]
+  params: hello
+  [I][2024-01-29T04:13:19.290Z][call_id:25][Hello.resolved][LEAVE]
+  result: hello resolved
+  [I][2024-01-29T04:13:19.290Z][call_id:26][Hello.rejected][REJECT]
+  reason: hello rejected
   ```
 
 ## 更多说明
