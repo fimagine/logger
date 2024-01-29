@@ -11,7 +11,11 @@ export interface IGlobalLoggerConfig {
 export interface ILoggerOpts extends Partial<IGlobalLoggerConfig> {
   level: 'warn' | 'log' | 'debug' | 'info' | 'error';
 }
+export interface IWrappedFunc<F extends (...args: any[]) => any> {
+  (...args: Parameters<F>): ReturnType<F>
+}
 export interface ILogger extends Annotation.IFunc, Annotation.ICls, ILoggerOpts {
+  Wrap<F extends (...args: any[]) => any>(whoami: string, func: F): IWrappedFunc<F>;
   Wrap<F extends (...args: any[]) => any>(func: F): (...args: Parameters<F>) => ReturnType<F>;
 }
 export interface ILoggerCreator {
@@ -35,7 +39,7 @@ const Create: ILoggerCreator = function (opts: Partial<ILoggerOpts> = {}): ILogg
     (timing === 'REJECT') && args.push('\nreason:', result);
     r.console![r.level](...args)
   }
-  const handle_any_result = (result: any, print_leave_log: (r: any) => void, print_reject_log: (r: any) => void) => {
+  const handle_any_result = <T>(result: T, print_leave_log: (r: any) => void, print_reject_log: (r: any) => void) => {
     if (!(result instanceof Promise)) {
       print_leave_log(result)
       return result;
@@ -50,7 +54,6 @@ const Create: ILoggerCreator = function (opts: Partial<ILoggerOpts> = {}): ILogg
   }
   const ret: ILogger = function r(target: any, property?: any, descriptor?: any): any {
     const whoami = property ? `${target.constructor.name}.${property}` : `Class ${target.name}`;
-    const fixed = `[${whoami}]`
     if (descriptor) {
       // CLASS FUNCTION DECORATOR
       const { value } = descriptor;
@@ -85,10 +88,11 @@ const Create: ILoggerCreator = function (opts: Partial<ILoggerOpts> = {}): ILogg
   ret.console = void 0 as unknown as any;
   ret.showRet = void 0 as unknown as any
   ret.print = void 0 as unknown as any
-  ret.Wrap = (any_func) => {
+  ret.Wrap = <F extends (...args: any[]) => any>(a: string | F, b?: F): IWrappedFunc<F> => {
+    const any_func: F = typeof a === 'function' ? a : b!;
     const r = ret;
-    const whoami = `${any_func.name || '<ANONYMOUS>'}`;
-    return (...params) => {
+    const whoami = typeof a === 'string' ? a : `${any_func.name || '<ANONYMOUS>'}`;
+    return (...params: Parameters<F>): ReturnType<F> => {
       const short_level = `[${r.level[0].toUpperCase()}]`
       if (r.disabled) return any_func(...params);
       const uid = ++_uid

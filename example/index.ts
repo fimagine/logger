@@ -121,7 +121,10 @@ async function run() {
   bar.promise_rejected("params 0").catch(() => { });
 
   const func = function (who: string) { return "i'm " + who };
-  console.log(LogArgsRet.Wrap(func)("davis") === func("davis"))
+  console.log(LogArgsRet.Wrap(func)("jerry") === func("jerry"))
+
+  const func2 = function (who: string) { return "i'm " + who };
+  console.log(LogArgsRet.Wrap('cat', func2)("tom") === func2("tom"))
 
 
   Info.showArgs = true; // show function params;
@@ -146,7 +149,7 @@ async function run() {
   const hello = new Hello('hi.')
   hello.sayIt('hello')
   hello.resolved('hello')
-  hello.rejected('hello').catch(() => {})
+  hello.rejected('hello').catch(() => { })
 }
 run()
 
