@@ -14,9 +14,10 @@ export interface ILoggerOpts extends Partial<IGlobalLoggerConfig> {
 export interface IWrappedFunc<F extends (...args: any[]) => any> {
   (...args: Parameters<F>): ReturnType<F>
 }
-export interface ILogger extends Annotation.IFunc, Annotation.ICls, ILoggerOpts {
+export interface ILogger extends Annotation.IFunc, Annotation.IProp, Annotation.ICls, ILoggerOpts {
   Wrap<F extends (...args: any[]) => any>(whoami: string, func: F): IWrappedFunc<F>;
   Wrap<F extends (...args: any[]) => any>(func: F): (...args: Parameters<F>) => ReturnType<F>;
+  Clone(opts?: Partial<ILoggerOpts>): ILogger;
 }
 export interface ILoggerCreator {
   (opts?: Partial<ILoggerOpts>): ILogger;
@@ -52,22 +53,58 @@ const Create: ILoggerCreator = function (opts: Partial<ILoggerOpts> = {}): ILogg
       return r1(reason)
     }))
   }
-  const ret: ILogger = function r(target: any, property?: any, descriptor?: any): any {
-    const whoami = property ? `${target.constructor.name}.${property}` : `Class ${target.name}`;
-    if (descriptor) {
+  const ret: ILogger = function r(target: any, arg2?: any, arg3?: any): any {
+    if (arg3) {
+      const property = arg2 as string
+      const descriptor = arg3 as TypedPropertyDescriptor<any>;
+      const { value, get, set } = descriptor;
+
       // CLASS FUNCTION DECORATOR
-      const { value } = descriptor;
-      descriptor.value = function (...params: any) {
-        const short_level = `[${r.level[0].toUpperCase()}]`
-        if (r.disabled) return value.call(this, ...params);
-        const uid = ++_uid
-        show(r, whoami, uid, short_level, 'ENTER', params);
-        const ret = value.call(this, ...params);
-        const print_leave_log = (ret: any) => show(r, whoami, uid, short_level, 'LEAVE', params, ret);
-        const print_reject_log = (reason: any) => show(r, whoami, uid, short_level, 'REJECT', params, reason);
-        return handle_any_result(ret, print_leave_log, print_reject_log)
-      };
+      if (value) {
+        const whoami = `${target.constructor.name}.${property}`;
+        descriptor.value = function (...params: any) {
+          const short_level = `[${r.level[0].toUpperCase()}]`
+          if (r.disabled) return value.call(this, ...params);
+          const uid = ++_uid
+          show(r, whoami, uid, short_level, 'ENTER', params);
+          const ret = value.call(this, ...params);
+          const print_leave_log = (ret: any) => show(r, whoami, uid, short_level, 'LEAVE', params, ret);
+          const print_reject_log = (reason: any) => show(r, whoami, uid, short_level, 'REJECT', params, reason);
+          return handle_any_result(ret, print_leave_log, print_reject_log)
+        };
+      }
+      // CLASS GETTER DECORATOR
+      if (get) {
+        const whoami = `${target.constructor.name}.${property} getter`;
+        descriptor.get = function () {
+          const short_level = `[${r.level[0].toUpperCase()}]`
+          if (r.disabled) return get.call(this);
+          const uid = ++_uid
+          show(r, whoami, uid, short_level, 'ENTER', void 0);
+          const ret = get.call(this);
+          const print_leave_log = (ret: any) => show(r, whoami, uid, short_level, 'LEAVE', void 0, ret);
+          const print_reject_log = (reason: any) => show(r, whoami, uid, short_level, 'REJECT', void 0, reason);
+          return handle_any_result(ret, print_leave_log, print_reject_log)
+        };
+      }
+      // CLASS FUNCTION DECORATOR
+      if (set) {
+        const whoami = `${target.constructor.name}.${property} setter`;
+        descriptor.set = function (...params: any[]) {
+          const short_level = `[${r.level[0].toUpperCase()}]`
+          if (r.disabled) return set.call(this, params[0]);
+          const uid = ++_uid
+          show(r, whoami, uid, short_level, 'ENTER', params);
+          set.call(this, params[0]);
+          const print_leave_log = (ret: any) => show(r, whoami, uid, short_level, 'LEAVE', params, void 0);
+          const print_reject_log = (reason: any) => show(r, whoami, uid, short_level, 'REJECT', params, reason);
+          return handle_any_result(ret, print_leave_log, print_reject_log)
+        };
+      }
+    } else if (arg2) {
+      console.log(target, arg2);
     } else {
+      const whoami = `Class ${target.name}`
       // CLASS DECORATOR
       return class _logger_wrapped extends target {
         constructor(...params: any[]) {
@@ -88,6 +125,7 @@ const Create: ILoggerCreator = function (opts: Partial<ILoggerOpts> = {}): ILogg
   ret.console = void 0 as unknown as any;
   ret.showRet = void 0 as unknown as any
   ret.print = void 0 as unknown as any
+  ret.Clone = (opts) => Create({ ...ret, ...opts })
   ret.Wrap = <F extends (...args: any[]) => any>(a: string | F, b?: F): IWrappedFunc<F> => {
     const any_func: F = typeof a === 'function' ? a : b!;
     const r = ret;
