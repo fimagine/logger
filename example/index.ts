@@ -80,9 +80,4 @@ const test_name = process.argv[2]
 if (test_name)
   test_functions.get(test_name)?.();
 else
-  for (const v of test_functions) v[1]();
-
-
-
-// run()
-
+  test_functions.forEach(v => v());
