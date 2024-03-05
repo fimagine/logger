@@ -76,6 +76,11 @@ function test_class_member() {
 }
 test_functions.set("class_member", test_class_member)
 
+function test_direct_print() {
+  Log.print('Hello', 'a', 'b', 'c')
+}
+test_functions.set("test_direct_print", test_direct_print)
+
 const test_name = process.argv[2]
 if (test_name)
   test_functions.get(test_name)?.();
