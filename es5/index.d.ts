@@ -1,9 +1,9 @@
 import { Annotation } from "@fimagine/annotation";
-export type LogTiming = 'ENTER' | 'LEAVE' | 'REJECT' | 'NEW' | 'END';
+export type LogTiming = 'ENTER' | 'LEAVE' | 'REJECT' | 'NEW' | 'END' | 'DIRECT';
 export interface IGlobalLoggerConfig {
     currentTime: () => string;
     console: Console;
-    print?: (Logger: ILogger, whoami: string, uid: number, timing: LogTiming, args: any[], result?: any) => any;
+    onPrint?: (Logger: ILogger, whoami: string, uid: number, timing: LogTiming, args: any[], result?: any) => any;
     showArgs: boolean;
     showRet: boolean;
     disabled: boolean;
@@ -18,6 +18,7 @@ export interface ILogger extends Annotation.IFunc, Annotation.IProp, Annotation.
     Wrap<F extends (...args: any[]) => any>(whoami: string, func: F): IWrappedFunc<F>;
     Wrap<F extends (...args: any[]) => any>(func: F): (...args: Parameters<F>) => ReturnType<F>;
     Clone(opts?: Partial<ILoggerOpts>): ILogger;
+    print(whoami: string, ...args: any[]): void;
 }
 export interface ILoggerCreator {
     (opts?: Partial<ILoggerOpts>): ILogger;

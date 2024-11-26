@@ -146,7 +146,9 @@ const Create: ILoggerCreator = function (opts: Partial<ILoggerOpts> = {}): ILogg
       return handle_any_result(ret, print_leave_log, print_reject_log)
     }
   };
-  ret.print = (whoami: string, ...params: any[]) => show(ret, whoami, 0, ret._short_level, 'DIRECT', params)
+  ret.print = (whoami: string, ...params: any[]) => {
+    ret.disabled || show(ret, whoami, 0, ret._short_level, 'DIRECT', params)
+  }
   const make_property = <K extends keyof IGlobalLoggerConfig = keyof IGlobalLoggerConfig>(k: K) => {
     Object.defineProperty(ret, k, {
       get: () => k in raw ? raw[k] : k in opts ? opts[k] : Config[k],

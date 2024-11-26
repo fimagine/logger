@@ -47,16 +47,22 @@ var Config = {
 var Create = function (opts) {
     if (opts === void 0) { opts = {}; }
     var show = function (r, whoami, uid, short_level, timing, params, result) {
-        var _a;
+        var _a, _b;
         if (params === void 0) { params = []; }
         if (result === void 0) { result = void 0; }
-        if (r.print)
-            r.print(r, whoami, uid, timing, params, result);
+        if (r.onPrint) {
+            r.onPrint(r, whoami, uid, timing, params, result);
+            return;
+        }
+        if (timing === 'DIRECT') {
+            (_a = r.console)[r.level].apply(_a, __spreadArray(["".concat(short_level, "[").concat(r.currentTime(), "][").concat(whoami, "]")], params, false));
+            return;
+        }
         var args = ["".concat(short_level, "[").concat(r.currentTime(), "][call_id:").concat(uid, "][").concat(whoami, "][").concat(timing, "]")];
         (r.showArgs && (timing === 'ENTER' || timing === 'NEW')) && args.push.apply(args, __spreadArray(['\nparams:'], params, false));
         (r.showRet && (timing === 'LEAVE' || timing === 'END')) && args.push('\nresult:', result);
         (timing === 'REJECT') && args.push('\nreason:', result);
-        (_a = r.console)[r.level].apply(_a, args);
+        (_b = r.console)[r.level].apply(_b, args);
     };
     var handle_any_result = function (result, print_leave_log, print_reject_log) {
         if (!(result instanceof Promise)) {
@@ -84,14 +90,13 @@ var Create = function (opts) {
                     for (var _i = 0; _i < arguments.length; _i++) {
                         params[_i] = arguments[_i];
                     }
-                    var short_level = "[".concat(r.level[0].toUpperCase(), "]");
                     if (r.disabled)
                         return value_1.call.apply(value_1, __spreadArray([this], params, false));
                     var uid = ++_uid;
-                    show(r, whoami_1, uid, short_level, 'ENTER', params);
+                    show(r, whoami_1, uid, r._short_level, 'ENTER', params);
                     var ret = value_1.call.apply(value_1, __spreadArray([this], params, false));
-                    var print_leave_log = function (ret) { return show(r, whoami_1, uid, short_level, 'LEAVE', params, ret); };
-                    var print_reject_log = function (reason) { return show(r, whoami_1, uid, short_level, 'REJECT', params, reason); };
+                    var print_leave_log = function (ret) { return show(r, whoami_1, uid, r._short_level, 'LEAVE', params, ret); };
+                    var print_reject_log = function (reason) { return show(r, whoami_1, uid, r._short_level, 'REJECT', params, reason); };
                     return handle_any_result(ret, print_leave_log, print_reject_log);
                 };
             }
@@ -99,14 +104,13 @@ var Create = function (opts) {
             if (get_1) {
                 var whoami_2 = "".concat(target.constructor.name, ".").concat(property, " getter");
                 descriptor.get = function () {
-                    var short_level = "[".concat(r.level[0].toUpperCase(), "]");
                     if (r.disabled)
                         return get_1.call(this);
                     var uid = ++_uid;
-                    show(r, whoami_2, uid, short_level, 'ENTER', void 0);
+                    show(r, whoami_2, uid, r._short_level, 'ENTER', void 0);
                     var ret = get_1.call(this);
-                    var print_leave_log = function (ret) { return show(r, whoami_2, uid, short_level, 'LEAVE', void 0, ret); };
-                    var print_reject_log = function (reason) { return show(r, whoami_2, uid, short_level, 'REJECT', void 0, reason); };
+                    var print_leave_log = function (ret) { return show(r, whoami_2, uid, r._short_level, 'LEAVE', void 0, ret); };
+                    var print_reject_log = function (reason) { return show(r, whoami_2, uid, r._short_level, 'REJECT', void 0, reason); };
                     return handle_any_result(ret, print_leave_log, print_reject_log);
                 };
             }
@@ -118,14 +122,13 @@ var Create = function (opts) {
                     for (var _i = 0; _i < arguments.length; _i++) {
                         params[_i] = arguments[_i];
                     }
-                    var short_level = "[".concat(r.level[0].toUpperCase(), "]");
                     if (r.disabled)
                         return set_1.call(this, params[0]);
                     var uid = ++_uid;
-                    show(r, whoami_3, uid, short_level, 'ENTER', params);
+                    show(r, whoami_3, uid, r._short_level, 'ENTER', params);
                     set_1.call(this, params[0]);
-                    var print_leave_log = function (ret) { return show(r, whoami_3, uid, short_level, 'LEAVE', params, void 0); };
-                    var print_reject_log = function (reason) { return show(r, whoami_3, uid, short_level, 'REJECT', params, reason); };
+                    var print_leave_log = function (ret) { return show(r, whoami_3, uid, r._short_level, 'LEAVE', params, void 0); };
+                    var print_reject_log = function (reason) { return show(r, whoami_3, uid, r._short_level, 'REJECT', params, reason); };
                     return handle_any_result(ret, print_leave_log, print_reject_log);
                 };
             }
@@ -144,11 +147,10 @@ var Create = function (opts) {
                         params[_i] = arguments[_i];
                     }
                     var _this = this;
-                    var short_level = "[".concat(r.level[0].toUpperCase(), "]");
                     var uid = ++_uid;
-                    show(r, whoami_4, uid, short_level, 'NEW', params);
+                    show(r, whoami_4, uid, r._short_level, 'NEW', params);
                     _this = _super.apply(this, params) || this;
-                    show(r, whoami_4, uid, short_level, 'END', params, _this);
+                    show(r, whoami_4, uid, r._short_level, 'END', params, _this);
                     return _this;
                 }
                 return _logger_wrapped;
@@ -157,12 +159,13 @@ var Create = function (opts) {
     };
     var raw = {};
     ret.level = opts.level || 'log';
+    ret._short_level = "[".concat(ret.level[0].toUpperCase(), "]");
     ret.disabled = void 0;
     ret.showArgs = void 0;
     ret.currentTime = void 0;
     ret.console = void 0;
     ret.showRet = void 0;
-    ret.print = void 0;
+    ret.onPrint = void 0;
     ret.Clone = function (opts) { return Create(__assign(__assign({}, ret), opts)); };
     ret.Wrap = function (a, b) {
         var any_func = typeof a === 'function' ? a : b;
@@ -173,16 +176,22 @@ var Create = function (opts) {
             for (var _i = 0; _i < arguments.length; _i++) {
                 params[_i] = arguments[_i];
             }
-            var short_level = "[".concat(r.level[0].toUpperCase(), "]");
             if (r.disabled)
                 return any_func.apply(void 0, params);
             var uid = ++_uid;
-            show(r, whoami, uid, short_level, 'ENTER', r.showArgs ? params : void 0);
+            show(r, whoami, uid, r._short_level, 'ENTER', r.showArgs ? params : void 0);
             var ret = any_func.apply(void 0, params);
-            var print_leave_log = function (ret) { return show(r, whoami, uid, short_level, 'LEAVE', params, ret); };
-            var print_reject_log = function (reason) { return show(r, whoami, uid, short_level, 'REJECT', params, reason); };
+            var print_leave_log = function (ret) { return show(r, whoami, uid, r._short_level, 'LEAVE', params, ret); };
+            var print_reject_log = function (reason) { return show(r, whoami, uid, r._short_level, 'REJECT', params, reason); };
             return handle_any_result(ret, print_leave_log, print_reject_log);
         };
+    };
+    ret.print = function (whoami) {
+        var params = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            params[_i - 1] = arguments[_i];
+        }
+        ret.disabled || show(ret, whoami, 0, ret._short_level, 'DIRECT', params);
     };
     var make_property = function (k) {
         Object.defineProperty(ret, k, {
@@ -195,7 +204,7 @@ var Create = function (opts) {
     make_property('currentTime');
     make_property('console');
     make_property('showRet');
-    make_property('print');
+    make_property('onPrint');
     return ret;
 };
 exports.Warn = Create({ level: 'warn' });
